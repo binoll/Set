@@ -17,6 +17,10 @@ public:
 
     bool remove(int32_t a); //Удаление элемента из множества
 
+    bool clear(); //Обнуление мн-ва
+
+    int32_t getSize() const; //Метод возвращает текущий размер мн-ва
+
     SetInt& operator=(const SetInt &set); //Перегрузка оператора для присваивания
 
     SetInt& operator=(SetInt &&set) noexcept; //Перегрузка оператора для присваивания с переносом
@@ -39,7 +43,7 @@ private:
     int32_t *ptr = nullptr; //Указывает на массив, в котором хранятся элементы множества
 };
 
-SetInt::SetInt(int32_t l, int32_t r) : l(l), r(r), n((r - l) / 32 + 1) {
+SetInt::SetInt(int32_t l, int32_t r) : l(l), r(r), n((r - l) / sizeof(int32_t) + 1) {
     ptr = new int32_t[n];
 
     for (int32_t i = 0; i < n; ++i) {
@@ -76,8 +80,8 @@ SetInt::~SetInt() {
 }
 
 bool SetInt::find(int32_t a) {
-    int32_t byte = (a - l) / 32;
-    int32_t bit = (a - l) % 32;
+    int32_t byte = (a - l) / (sizeof(int32_t) * 8);
+    int32_t bit = (a - l) % (sizeof(int32_t) * 8);
     int32_t mask = 1 << bit;
 
     if (static_cast<bool>(mask & ptr[byte])) {
@@ -88,10 +92,13 @@ bool SetInt::find(int32_t a) {
 }
 
 bool SetInt::add(int32_t a) {
-    int32_t byte = (a - l) / 32;
-    int32_t bit = (a - l) % 32;
+    int32_t byte = (a - l) / (sizeof(int32_t) * 8);
+    int32_t bit = (a - l) % (sizeof(int32_t) * 8);
     int32_t mask = 1 << bit;
 
+    if (size == (r - l) || a > r || a < l) {
+        return false;
+    }
     if (!static_cast<bool>(mask & ptr[byte])) {
         ptr[byte] |= mask;
         ++size;
@@ -102,17 +109,32 @@ bool SetInt::add(int32_t a) {
 }
 
 bool SetInt::remove(int32_t a) {
-    int32_t byte = (a - l) / 32;
-    int32_t bit = (a - l) % 32;
-    int32_t mask = ~(1 << bit);
+    int32_t byte = (a - l) / (sizeof(int32_t) * 8);
+    int32_t bit = (a - l) % (sizeof(int32_t) * 8);
+    int32_t mask = 1 << bit;
 
+    if (size == 0) {
+        return false;
+    }
     if (static_cast<bool>(mask & ptr[byte])) {
-        ptr[byte] &= mask;
+        ptr[byte] &= ~mask;
         --size;
         return true;
     }
 
     return false;
+}
+
+bool SetInt::clear() {
+    for (int32_t i = 0; i < n; ++i) {
+        ptr[i] = 0;
+    }
+
+    return true;
+}
+
+int32_t SetInt::getSize() const {
+    return size;
 }
 
 SetInt& SetInt::operator=(const SetInt &set) {
@@ -149,7 +171,7 @@ const SetInt& operator+(SetInt &set_left, SetInt &set_right) {
 
     set_left.size = 0;
 
-    for (int32_t start = 0, end = (set_left.r - set_left.l); start < end; ++start) {
+    for (int32_t start = set_left.l, end = (set_left.r - set_left.l); start < end; ++start) {
         if (set_left.find(start)) {
             ++set_left.size;
         }
@@ -165,7 +187,7 @@ const SetInt& operator*(SetInt &set_left, SetInt &set_right) {
 
     set_left.size = 0;
 
-    for (int32_t start = 0, end = (set_left.r - set_left.l); start < end; ++start) {
+    for (int32_t start = set_left.l, end = (set_left.r - set_left.l); start < end; ++start) {
         if (set_left.find(start)) {
             ++set_left.size;
         }
@@ -201,6 +223,14 @@ const SetInt& operator~(SetInt &set) {
 
     for (int32_t start = 0, end = set.n; start < end; ++start) {
         set.ptr[start] = ~(set.ptr[start]);
+    }
+
+    set.size = 0;
+
+    for (int16_t start = set.l, end = (set.r - set.l); start < end; ++start) {
+        if (set.find(start)) {
+            ++set.size;
+        }
     }
 
     return set;

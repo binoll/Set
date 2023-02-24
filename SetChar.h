@@ -17,6 +17,10 @@ public:
 
     bool remove(char a); //Удаление элемента из множества
 
+    bool clear(); //Обнуление мн-ва
+
+    int16_t getSize() const; //Метод возвращает текущий размер мн-ва
+
     SetChar& operator=(const SetChar &set); //Перегрузка оператора для присваивания
 
     SetChar& operator=(SetChar &&set) noexcept; //Перегрузка оператора для присваивания с переносом
@@ -39,7 +43,7 @@ private:
     char *ptr = nullptr; //Указывает на массив, в котором хранятся элементы множества
 };
 
-SetChar::SetChar(int16_t l, int16_t r) : l(l), r(r), n((r - l) / 8 + 1) {
+SetChar::SetChar(int16_t l, int16_t r) : l(l), r(r), n((r - l) / sizeof(char) + 1) {
     ptr = new char[n];
 
     for (int16_t i = 0; i < n; ++i) {
@@ -80,8 +84,8 @@ SetChar::~SetChar() {
 }
 
 bool SetChar::find(char a) {
-    int16_t byte = (static_cast<int16_t>(a) - l) / 8;
-    int16_t bit = (static_cast<int16_t>(a) - l) % 8;
+    int16_t byte = (static_cast<int16_t>(a) - l) / (sizeof(char) * 8);
+    int16_t bit = (static_cast<int16_t>(a) - l) % (sizeof(char) * 8);
     int16_t mask = 1 << bit;
 
     if (static_cast<bool>(mask & ptr[byte])) {
@@ -92,10 +96,13 @@ bool SetChar::find(char a) {
 }
 
 bool SetChar::add(char a) {
-    int16_t byte = (static_cast<int16_t>(a) - l) / 8;
-    int16_t bit = (static_cast<int16_t>(a) - l) % 8;
+    int16_t byte = (static_cast<int16_t>(a) - l) / (sizeof(char) * 8);
+    int16_t bit = (static_cast<int16_t>(a) - l) % (sizeof(char) * 8);
     int8_t mask = 1 << bit;
 
+    if (size == (r - l) || a > r || a < l) {
+        return false;
+    }
     if (!static_cast<bool>(mask & ptr[byte])) {
         ptr[byte] |= mask;
         ++size;
@@ -106,17 +113,32 @@ bool SetChar::add(char a) {
 }
 
 bool SetChar::remove(char a) {
-    int16_t byte = (static_cast<int16_t>(a) - l) / 8;
-    int16_t bit = (static_cast<int16_t>(a) - l) % 8;
-    int16_t mask = ~(1 << bit);
+    int16_t byte = (static_cast<int16_t>(a) - l) / (sizeof(char) * 8);
+    int16_t bit = (static_cast<int16_t>(a) - l) % (sizeof(char) * 8);
+    int16_t mask = 1 << bit;
 
+    if (size == 0) {
+        return false;
+    }
     if (static_cast<bool>(mask & ptr[byte])) {
-        ptr[byte] &= mask;
+        ptr[byte] &= ~(mask);
         --size;
         return true;
     }
 
-    return false;
+     return false;
+}
+
+bool SetChar::clear() {
+    for (int16_t i = 0; i < n; ++i) {
+        ptr[i] = 0;
+    }
+
+    return true;
+}
+
+int16_t SetChar::getSize() const {
+    return size;
 }
 
 SetChar& SetChar::operator=(const SetChar &set) {
@@ -153,7 +175,7 @@ const SetChar& operator+(SetChar &set_left, SetChar &set_right) {
 
     set_left.size = 0;
 
-    for (int16_t start = 0, end = (set_left.r - set_left.l); start < end; ++start) {
+    for (int16_t start = set_left.l, end = (set_left.r - set_left.l); start < end; ++start) {
         if (set_left.find(start)) {
             ++set_left.size;
         }
@@ -169,7 +191,7 @@ const SetChar& operator*(SetChar &set_left, SetChar &set_right) {
 
     set_left.size = 0;
 
-    for (int16_t start = 0, end = (set_left.r - set_left.l); start < end; ++start) {
+    for (int16_t start = set_left.l, end = (set_left.r - set_left.l); start < end; ++start) {
         if (set_left.find(start)) {
             ++set_left.size;
         }
@@ -180,11 +202,13 @@ const SetChar& operator*(SetChar &set_left, SetChar &set_right) {
 
 const SetChar& operator-(SetChar &set_left, SetChar &set_right) {
     if (set_left.size > set_right.size) {
-        set_left.size = 0;
         for (int16_t start = 0, end = set_left.n; start < end; ++start) {
             set_left.ptr[start] &= ~(set_right.ptr[start]);
         }
-        for (int16_t start = 0, end = (set_left.r - set_left.l); start < end; ++start) {
+
+        set_left.size = 0;
+
+        for (int16_t start = set_left.l, end = (set_left.r - set_left.l); start < end; ++start) {
             if (set_left.find(start)) {
                 ++set_left.size;
             }
@@ -201,10 +225,16 @@ const SetChar& operator-(SetChar &set_left, SetChar &set_right) {
 }
 
 const SetChar& operator~(SetChar &set) {
-    set.size = set.n - set.size;
-
     for (int16_t start = 0, end = set.n; start < end; ++start) {
         set.ptr[start] = ~(set.ptr[start]);
+    }
+
+    set.size = 0;
+
+    for (int16_t start = set.l, end = (set.r - set.l); start < end; ++start) {
+        if (set.find(start)) {
+            ++set.size;
+        }
     }
 
     return set;
@@ -214,7 +244,7 @@ std::ostream& operator<<(std::ostream &stream, SetChar &set) {
     int16_t count = 0;
 
     stream << "{ ";
-    for (int16_t start = 0, end = (set.r - set.l); start < end; ++start) {
+    for (int16_t start = set.l, end = (set.r - set.l); start < end; ++start) {
         if (set.find(start)) {
             if (count == 0) {
                 std::cout << static_cast<char>(start) << " (" << static_cast<int16_t>(start) << ")";

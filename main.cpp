@@ -28,13 +28,13 @@ int main() {
     std::cout << "Before: " << setchar1 << " " << setchar2 << " " << setchar3
               << " " << setchar4 << " " << setchar5 << '\n';
     setchar1 + setchar2;
-    std::cout << "After sum: " << setchar1 << '\n';
+    std::cout << "After sum: " << setchar1 << ". Size: " << setchar1.getSize() << '\n';
     setchar1 - setchar3;
-    std::cout << "After dif: " << setchar1 << '\n';
+    std::cout << "After dif: " << setchar1 << ". Size: " << setchar1.getSize() << '\n';
     setchar1.remove('2');
-    std::cout << "After remove: " << setchar1 << '\n';
+    std::cout << "After remove: " << setchar1 << ". Size: " << setchar1.getSize() << '\n';
     setchar4 * setchar5;
-    std::cout << "After composition: " << setchar4 << '\n';
+    std::cout << "After composition: " << setchar4 << ". Size: " << setchar4.getSize() << '\n';
 
     /*Класс SetInt*/
     int32_t l2, r2;
@@ -50,11 +50,11 @@ int main() {
 
     std::cout << "Before: " << setint1 << " " << setint2 << '\n';
     setint1 + setint2;
-    std::cout << "After sum: " << setint1 << '\n';
+    std::cout << "After sum: " << setint1 << ". Size: " << setint1.getSize() << '\n';
     setint1.remove(10);
-    std::cout << "After remove: " << setint1 << '\n';
+    std::cout << "After remove: " << setint1 << ". Size: " << setint1.getSize() << '\n';
     ~setint1;
-    std::cout << "After addition: " << setint1 << '\n';
+    std::cout << "After addition: " << setint1 << ". Size: " << setint1.getSize() << '\n';
 
     return 0;
 }
