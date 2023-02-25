@@ -1,64 +1,76 @@
 #include "lib/googletest/include/gtest/gtest.h"
+#include "../headers.h"
 #include "../SetChar.h"
 
 int l1 = 0, r1 = 100;
-int l2 = 0, r2 = 10;
+int l2 = 50, r2 = 100;
+int l3 = 0, r3 = 100;
+int l4 = 50, r4 = 100;
 SetChar setchar1(l1, r1);
 SetChar setchar2(l1, r1);
-SetChar setchar3(l2, r2);
-SetChar setchar4(l2, r2);
-SetChar setchar5(l1, r1);
-SetChar setchar6(l1, r1);
+SetChar setchar3(l1, r1);
+SetChar setchar4(l1, r1);
+SetChar setchar5(l2, r2);
+SetChar setchar6(l2, r2);
+SetChar setchar7(l2, r2);
+SetChar setchar8(l3, r3);
+SetChar setchar9(l3, r3);
+SetChar setchar10(l4, r4);
+SetChar setchar11(l3, r3);
+SetChar setchar12(l4, r4);
+SetChar setchar13(l4, r4);
 std::array<char, 100> arr1 = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-                             11, 12, 13, 14, 15, 16, 17, 18, 19,
-                             20, 21, 22, 23, 24, 25,26, 27, 28, 29,
+                              11, 12, 13, 14, 15, 16, 17, 18, 19,
+                              20, 21, 22, 23, 24, 25,26, 27, 28, 29,
+                              30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
+                              40, 41, 42, 43, 44, 45, 46, 47, 48, 49,
+                              50, 51, 52, 53, 54, 55, 56, 57, 58, 59,
+                              60, 61, 62, 63, 64, 65, 66, 67, 68, 69,
+                              70, 71, 72, 73, 74, 75, 76, 77, 78, 79,
+                              80, 81, 82, 83, 84, 85, 86, 87, 88, 89,
+                              90, 91, 92, 93, 94, 95, 96, 97, 98, 99};
+std::array<char, 10> arr2 = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+std::array<char, 11> arr3 = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+std::array<char, 41> arr4 = {20, 21, 22, 23, 24, 25,26, 27, 28, 29,
                              30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
                              40, 41, 42, 43, 44, 45, 46, 47, 48, 49,
-                             50, 51, 52, 53, 54, 55, 56, 57, 58, 59,
-                             60, 61, 62, 63, 64, 65, 66, 67, 68, 69,
-                             70, 71, 72, 73, 74, 75, 76, 77, 78, 79,
-                             80, 81, 82, 83, 84, 85, 86, 87, 88, 89,
-                             90, 91, 92, 93, 94, 95, 96, 97, 98, 99};
-std::array<char, 11> arr2 = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-std::array<char, 51> arr3 = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-                             11, 12, 13, 14, 15, 16, 17, 18, 19,
-                             20, 21, 22, 23, 24, 25,26, 27, 28, 29,
-                             30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
-                             40, 41, 42, 43, 44, 45, 46, 47, 48, 49,
-                             50};
-std::array<char, 49> arr4 = {51, 52, 53, 54, 55, 56, 57, 58, 59,
+                             50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60};
+std::array<char, 49> arr5 = {51, 52, 53, 54, 55, 56, 57, 58, 59,
                              60, 61, 62, 63, 64, 65, 66, 67, 68, 69,
                              70, 71, 72, 73, 74, 75, 76, 77, 78, 79,
                              80, 81, 82, 83, 84, 85, 86, 87, 88, 89,
                              90, 91, 92, 93, 94, 95, 96, 97, 98, 99};
 
 TEST(TestSetChar, TestAddMethod) {
+    ASSERT_EQ(setchar1.getSize(), setchar2.getSize());
+
     for (auto s : arr1) {
         ASSERT_TRUE(setchar1.add(s));
         ASSERT_TRUE(setchar2.add(s));
-        if (s > r2) {
-            ASSERT_FALSE(setchar3.add(s));
-        }
     }
 
     ASSERT_EQ(setchar1.getSize(), setchar2.getSize());
-    ASSERT_NE(setchar1.getSize(), setchar3.getSize());
 }
 
 TEST(TestSetChar, TestRemoveMethod) {
-    ASSERT_EQ(setchar1.getSize(), setchar2.getSize());
+    ASSERT_EQ(setchar3.getSize(), setchar4.getSize());
 
-    for (auto s : arr1) {
-        ASSERT_TRUE(setchar1.remove(s));
-        ASSERT_TRUE(setchar2.remove(s));
-        ASSERT_FALSE(setchar3.remove(s));
+    for (auto s : arr2) {
+        setchar3.add(s);
     }
+    for (auto s : arr3) {
+        setchar4.add(s);
+    }
+
+    ASSERT_NE(setchar3.getSize(), setchar4.getSize());
+    ASSERT_TRUE(setchar4.remove(10));
+    ASSERT_EQ(setchar3.getSize(), setchar4.getSize());
 }
 
 TEST(TestSetChar, TestFindMethod) {
-    for (auto s : arr2) {
-        setchar3.add(s);
-        setchar4.add(s);
+    for (auto s : arr3) {
+        setchar5.add(s);
+        setchar6.add(s);
     }
 
     setchar3.remove(5);
@@ -79,40 +91,46 @@ TEST(TestSetChar, TestFindMethod) {
 }
 
 TEST(TestSetChar, TestSum) {
-    for (auto s : arr3) {
-        setchar5.add(s);
-    }
     for (auto s : arr4) {
-        setchar6.add(s);
+        setchar7.add(s);
+    }
+    for (auto s : arr5) {
+        setchar8.add(s);
     }
 
-    setchar5 + setchar6;
+    ASSERT_EQ(11, setchar7.getSize());
 
-    ASSERT_EQ(100, setchar5.getSize());
-    ASSERT_NE(100, setchar6.getSize());
+    setchar7 + setchar8;
 
-    for (auto s : arr1) {
-        ASSERT_TRUE(setchar5.find(s));
-    }
-    for (auto s : arr1) {
-        if (s < 51) {
-            ASSERT_FALSE(setchar6.find(s));
-        }
-    }
-
-    setchar6 + setchar5;
-
-    ASSERT_EQ(100, setchar5.getSize());
-    ASSERT_EQ(100, setchar6.getSize());
-
-    for (auto s : arr1) {
-        ASSERT_TRUE(setchar5.find(s));
-    }
-    for (auto s : arr1) {
-        ASSERT_TRUE(setchar6.find(s));
-    }
+    ASSERT_EQ(50, setchar7.getSize());
 }
 
 TEST(TestSetChar, TestDif) {
-    
+    for (auto s : arr4) {
+        setchar9.add(s);
+    }
+    for (auto s : arr5) {
+        setchar10.add(s);
+    }
+
+    ASSERT_EQ(41, setchar9.getSize());
+
+    setchar9 - setchar10;
+
+    ASSERT_EQ(49, setchar10.getSize());
+}
+
+TEST(TestSetChar, TestMulti) {
+    for (auto s: arr4) {
+        setchar11.add(s);
+    }
+    for (auto s: arr5) {
+        setchar12.add(s);
+    }
+
+    ASSERT_NE(setchar12.getSize(), setchar11.getSize());
+
+    setchar11 * setchar12;
+
+    ASSERT_EQ(10, setchar11.getSize());
 }

@@ -18,12 +18,11 @@ int main() {
 
     setchar1.add('1');
     setchar2.add('2');
+    setchar3.add('1');
     setchar4.add('B');
     setchar4.add('A');
     setchar5.add('B');
     setchar5.add('C');
-
-    setchar3 = setchar1;
 
     std::cout << "Before: " << setchar1 << " " << setchar2 << " " << setchar3
               << " " << setchar4 << " " << setchar5 << '\n';

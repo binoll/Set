@@ -43,7 +43,7 @@ private:
     char *ptr = nullptr; //Указывает на массив, в котором хранятся элементы множества
 };
 
-SetChar::SetChar(int16_t l, int16_t r) : l(l), r(r), n((r - l) / sizeof(char) + 1) {
+SetChar::SetChar(int16_t l, int16_t r) : l(l), r(r), n((r - l) / (sizeof(char) * 8) + 1) {
     ptr = new char[n];
 
     for (int16_t i = 0; i < n; ++i) {
@@ -76,10 +76,6 @@ SetChar::SetChar(SetChar &&set) noexcept {
 }
 
 SetChar::~SetChar() {
-    for (int16_t i = 0; i < n; ++i) {
-        ptr[i] = 0;
-    }
-
     delete[] ptr;
 }
 
@@ -98,9 +94,9 @@ bool SetChar::find(char a) {
 bool SetChar::add(char a) {
     int16_t byte = (static_cast<int16_t>(a) - l) / (sizeof(char) * 8);
     int16_t bit = (static_cast<int16_t>(a) - l) % (sizeof(char) * 8);
-    int8_t mask = 1 << bit;
+    int16_t mask = 1 << bit;
 
-    if (size == (r - l) || a > r || a < l) {
+    if ((a > r) || (a < l)) {
         return false;
     }
     if (!static_cast<bool>(mask & ptr[byte])) {
@@ -117,9 +113,6 @@ bool SetChar::remove(char a) {
     int16_t bit = (static_cast<int16_t>(a) - l) % (sizeof(char) * 8);
     int16_t mask = 1 << bit;
 
-    if (size == 0) {
-        return false;
-    }
     if (static_cast<bool>(mask & ptr[byte])) {
         ptr[byte] &= ~(mask);
         --size;
@@ -133,6 +126,8 @@ bool SetChar::clear() {
     for (int16_t i = 0; i < n; ++i) {
         ptr[i] = 0;
     }
+
+    size = 0;
 
     return true;
 }
@@ -169,70 +164,98 @@ SetChar& SetChar::operator=(SetChar &&set) noexcept {
 }
 
 const SetChar& operator+(SetChar &set_left, SetChar &set_right) {
-    for (int16_t start = 0, end = set_left.n; start < end; ++start) {
-        set_left.ptr[start] |= set_right.ptr[start];
-    }
-
-    set_left.size = 0;
-
-    for (int16_t start = set_left.l, end = (set_left.r - set_left.l); start < end; ++start) {
-        if (set_left.find(start)) {
-            ++set_left.size;
+    if (set_left.r > set_right.l) {
+        for (int16_t i = set_right.l; i < set_left.r; ++i) {
+            if (set_right.find(i)) {
+                set_left.add(i);
+            }
         }
+
+        set_left.size = 0;
+
+        for (int16_t i = set_left.l; i < set_left.r; ++i) {
+            if (set_left.find(i)) {
+                ++set_left.size;
+            }
+        }
+    }
+    else if ((set_left.l > set_right.l) && (set_left.r < set_left.r)) {
+        for (int16_t i = set_right.l; i < set_left.r; ++i) {
+            if (set_right.find(i)) {
+                set_left.add(i);
+            }
+        }
+
+        return set_left;
     }
 
     return set_left;
 }
 
 const SetChar& operator*(SetChar &set_left, SetChar &set_right) {
-    for (int16_t start = 0, end = set_left.n; start < end; ++start) {
-        set_left.ptr[start] &= set_right.ptr[start];
-    }
-
-    set_left.size = 0;
-
-    for (int16_t start = set_left.l, end = (set_left.r - set_left.l); start < end; ++start) {
-        if (set_left.find(start)) {
-            ++set_left.size;
+    if (set_left.r > set_right.l) {
+        for (int16_t i = set_left.l; i < set_right.l; ++i) {
+            set_left.remove(i);
         }
+        for (int16_t i = set_right.l; i < set_left.r; ++i) {
+            if (!(set_left.find(i) && set_right.find(i))) {
+                set_left.remove(i);
+            }
+        }
+
+        set_left.size = 0;
+
+        for (int16_t i = set_left.l; i < set_left.r; ++i) {
+            if (set_left.find(i)) {
+                ++set_left.size;
+            }
+        }
+    }
+    else {
+        set_left.clear();
+        set_left.size = 0;
+
+        return set_left;
     }
 
     return set_left;
 }
 
 const SetChar& operator-(SetChar &set_left, SetChar &set_right) {
-    if (set_left.size > set_right.size) {
-        for (int16_t start = 0, end = set_left.n; start < end; ++start) {
-            set_left.ptr[start] &= ~(set_right.ptr[start]);
+    if (set_left.r > set_right.l) {
+        for (int16_t i = set_right.l; i < set_left.r; ++i) {
+            if (set_left.find(i) && set_right.find(i)) {
+                set_left.remove(i);
+            }
         }
 
         set_left.size = 0;
 
-        for (int16_t start = set_left.l, end = (set_left.r - set_left.l); start < end; ++start) {
-            if (set_left.find(start)) {
+        for (int16_t i = set_left.l; i < set_left.r; ++i) {
+            if (set_left.find(i)) {
                 ++set_left.size;
             }
         }
     }
-    else {
-        for (int16_t start = 0, end = set_left.n; start < end; ++start) {
-            set_left.ptr[start] = 0;
-        }
+    else if ((set_left.l > set_right.l) && (set_left.r < set_left.r)) {
+        set_left.clear();
         set_left.size = 0;
+
+        return set_left;
     }
 
     return set_left;
 }
 
 const SetChar& operator~(SetChar &set) {
-    for (int16_t start = 0, end = set.n; start < end; ++start) {
-        set.ptr[start] = ~(set.ptr[start]);
+    for (int16_t i = 0; i < set.n; ++i) {
+        set.ptr[i] = ~(set.ptr[i]);
     }
 
     set.size = 0;
 
-    for (int16_t start = set.l, end = (set.r - set.l); start < end; ++start) {
-        if (set.find(start)) {
+    for (int16_t i = set.l; i <= set.r; ++i) {
+        if (set.find(i)) {
             ++set.size;
         }
     }
@@ -244,13 +267,15 @@ std::ostream& operator<<(std::ostream &stream, SetChar &set) {
     int16_t count = 0;
 
     stream << "{ ";
-    for (int16_t start = set.l, end = (set.r - set.l); start < end; ++start) {
-        if (set.find(start)) {
+    for (int16_t i = set.l; i < set.r; ++i) {
+        if (set.find(i)) {
             if (count == 0) {
-                std::cout << static_cast<char>(start) << " (" << static_cast<int16_t>(start) << ")";
+                std::cout << "'" << static_cast<char>(i) << "'" << "(" << static_cast<int16_t>(i) << ")";
             }
             else {
-                std::cout << ", " << static_cast<char>(start) << " (" << static_cast<int16_t>(start) << ")";
+                std::cout << ", ";
+                std::cout << "'" << static_cast<char>(i) << "'";
+                std::cout << "(" << static_cast<int16_t>(i) << ")";
             }
             ++count;
         }
