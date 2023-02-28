@@ -20,6 +20,7 @@ namespace Char {
     SetChar setchar11(l3, r3);
     SetChar setchar12(l4, r4);
     SetChar setchar13(l2, r2);
+    SetChar setchar14(l1, r1);
     std::array<char, 100> arr1 = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
                                   11, 12, 13, 14, 15, 16, 17, 18, 19,
                                   20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
@@ -151,4 +152,12 @@ TEST(TestSetChar, TestAddition) {
     ~setchar13;
 
     ASSERT_EQ(31, setchar13.getSize());
+}
+
+TEST(TestSetChar, TestAssignment) {
+    for (auto s : arr1) {
+        setchar14.add(s);
+    }
+
+    ASSERT_ANY_THROW(setchar14 = setchar14);
 }

@@ -100,47 +100,39 @@ int16_t SetChar::getSize() const {
 }
 
 SetChar& SetChar::operator=(const SetChar &set) {
-    try {
-        if (this->ptr == set.ptr) {
-            throw std::exception();
-        }
-        else {
-            delete[] this->ptr;
+    if (this->ptr == set.ptr) {
+        throw std::exception();
+    }
+    else {
+        delete[] this->ptr;
 
-            this->size = set.size;
-            this->l = set.l;
-            this->r = set.r;
-            this->n = set.n;
+        this->size = set.size;
+        this->l = set.l;
+        this->r = set.r;
+        this->n = set.n;
 
-            for (int16_t i = 0; i < n; ++i) {
-                this->ptr[i] = set.ptr[i];
-            }
+        for (int16_t i = 0; i < n; ++i) {
+            this->ptr[i] = set.ptr[i];
         }
-    } catch (...) {
-        std::cout << "\nYou can't assign it yourself\n";
     }
 
     return *this;
 }
 
 SetChar& SetChar::operator=(SetChar &&set) {
-    try {
-        if (this->ptr == set.ptr) {
-            throw std::exception();
-        }
-        else {
-            this->ptr = set.ptr;
-            this->size = set.size;
-            this->l = set.l;
-            this->r = set.r;
+    if (this->ptr == set.ptr) {
+        throw std::exception();
+    }
+    else {
+        this->ptr = set.ptr;
+        this->size = set.size;
+        this->l = set.l;
+        this->r = set.r;
 
-            set.ptr = nullptr;
-            set.n = 0;
-            set.r = 0;
-            set.l = 0;
-        }
-    } catch (...) {
-        std::cout << "\nYou can't assign it yourself\n";
+        set.ptr = nullptr;
+        set.n = 0;
+        set.r = 0;
+        set.l = 0;
     }
 
     return *this;

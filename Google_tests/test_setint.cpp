@@ -20,6 +20,7 @@ namespace Int {
     SetInt setint11(l3, r3);
     SetInt setint12(l4, r4);
     SetInt setint13(l2, r2);
+    SetInt setint14(l1, r1);
     std::array<int, 100> arr1 = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
                                  11, 12, 13, 14, 15, 16, 17, 18, 19,
                                  20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
@@ -151,4 +152,12 @@ TEST(TestSetInt, TestAddition) {
     ~setint13;
 
     ASSERT_EQ(31, setint13.getSize());
+}
+
+TEST(TestSetInt, TestAssignment) {
+    for (auto s : arr1) {
+        setint14.add(s);
+    }
+
+    ASSERT_ANY_THROW(setint14 = setint14);
 }
